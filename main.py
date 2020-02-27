@@ -12,6 +12,7 @@ NB_AGENTS = 20
 MAX_MEMORY_SIZE = 10
 NEIGHBOURHOOD_SIZE = 2
 MAX_MOVES = 1
+MAX_ITER = 10000
 
 
 # ===================== Helpers =======================
@@ -27,23 +28,36 @@ def create_manhattan_distance(position: (int, int)):
 
 
 class Agent:
-    def __init__(self, neighbourhood_size: int, moves: int = 1):
+    def __init__(self, environment, pos, moves: int = 1):
         self.memory = deque(maxlen=MAX_MEMORY_SIZE)  # FIXME Give it as a parameter ?
         self.carry = None  # What is the agent currently carrying
         self.moves = moves  # Number of moves (ie, move 1 cell in any direction) the agent can do
-        self.neighbourhood_size = neighbourhood_size
+        self.env = environment
+        self.pos = None
 
-    def memorize(self, most_frequent_elem_in_area: object):
-        self.memory.append(most_frequent_elem_in_area)
+    def memorize(self, element: object):
+        self.memory.append(element)
 
     def act(self):
-        return self.carry is not None
+        # Perception
+        current_cell = self.env.grid[self.pos[0]][self.pos[1]]
+        self.memory.append(current_cell)
+
+        # Act
+        if current_cell is not None:
+            # Try put down
+            if self.carry:
+                pass
+            # Try pick up
+            else:
+                pass
 
 
 class Environment:
     def __init__(self, objects: [(object, int)] = (('A', 200), ('B', 200)), grid_size: int = 50):
         self.grid_size = grid_size
         self.grid = [[None for i in range(grid_size)] for j in range(grid_size)]
+        self.agent_grid = [[None for i in range(grid_size)] for j in range(grid_size)]
         for object_type, nb_object in objects:
             count = nb_object
             while count > 0:
@@ -64,56 +78,36 @@ class Environment:
             placed = False
             while not placed:
                 x, y = random_position_in_grid(self.grid_size)
-                if self.grid[y][x] is None:
-                    self.grid[y][x] = agent
-
-    def perception(self, agent: Agent):
-        # Find agent
-        for y, line in enumerate(self.grid):
-            if agent in line:
-                x = line.index(agent)
-                break
-        # Find most frequent element in the neighbourhood
-        most_frequent = self._most_frequent_in_area(agent, (x, y))
-        # Memorize it
-        agent.memorize(most_frequent)
-
-    def _most_frequent_in_area(self, agent: Agent, position: (int, int)) -> object:
-        dist = create_manhattan_distance(position)
-        area = []
-        for y, row in enumerate(self.grid):
-            for x, cell in enumerate(row):
-                if cell is not None and dist(x, y) < agent.neighbourhood_size:
-                    area.append(cell)
-        return Counter(area).most_common(1)[0][0]
+                if self.agent_grid[y][x] is None:
+                    self.agent_grid[y][x] = agent
+                    agent.pos = (y, x)
 
     def move(self, agent: Agent):
-        # TODO
-        pass
+        possible_range = list(range(-agent.moves, agent.moves))     # (-2, -1, 0, 1, 2) for moves = 2
+        possible_range.remove(0)
+
+        position = agent.pos[:]
+        position[0] += random.choice(possible_range)
+        position[1] += random.choice(possible_range)
+
+        if 0 <= position[0] < self.grid_size and 0 <= position[1] < self.grid_size \
+                and self.grid[position[0]][position[1]] is None:
+            self.grid[position[0]][position[1]] = agent
+            agent.pos = position
 
 
-def init_agents(nb_agents: int) -> [Agent]:
+def init_agents(nb_agents: int, environment: Environment) -> [Agent]:
     agents = []
     for i in range(nb_agents):
-        agents.append(Agent(NEIGHBOURHOOD_SIZE))
+        agents.append(Agent(environment))
     return agents
 
 
-def main_loop():
+if __name__ == '__main__':
     env = Environment(objects=OBJECTS, grid_size=GRID_SIZE)
-    agents = init_agents(NB_AGENTS)
+    agents = init_agents(NB_AGENTS, env)
     env.populate(agents)
-    sorted = False
-    while not sorted:
+    for it in range(MAX_ITER):
         agent = random.choice(agents)
-        env.perception(agent)
-
-        if not agent.carry:
-            # Try to pick something
-            pass
-
-        if agent.carry:
-            # Try to put something down
-            pass
-
+        agent.act()
         env.move(agent)

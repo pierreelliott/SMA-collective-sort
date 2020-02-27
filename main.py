@@ -91,7 +91,7 @@ class Environment:
         position[1] += random.choice(possible_range)
 
         if 0 <= position[0] < self.grid_size and 0 <= position[1] < self.grid_size \
-                and self.grid[position[0]][position[1]] is None:
+                and self.agent_grid[position[0]][position[1]] is None:
             self.grid[position[0]][position[1]] = agent
             agent.pos = position
 

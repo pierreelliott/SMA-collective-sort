@@ -9,15 +9,15 @@ random.seed(0)
 GRID_SIZE = 50
 OBJECTS = (('A', 200), ('B', 200))
 # Agents constants
-NB_AGENTS = 20
+NB_AGENTS = 50
 MAX_MEMORY_SIZE = 10
 NEIGHBOURHOOD_SIZE = 2
 MAX_MOVES = 1
-MAX_ITER = 10000
+MAX_ITER = int(1e7)
 K_PICK = 0.1    # k+
 K_PUT = 0.3     # k-
 
-REFRESH_FREQ = 1000
+REFRESH_FREQ = MAX_ITER//10
 
 
 # ===================== Helpers =======================
@@ -49,13 +49,13 @@ class Agent:
         self.memory.append(o)
 
         # Try pick up
-        if o is not None and self.p_pick(o) > random.random():
+        if not self.carry and o is not None and self.p_pick(o) > random.random():
             self.carry = o
             self.env.set_obj(self.pos, None)
         # Try put down
-        elif self.carry and self.p_put(o) > random.random():
+        elif self.carry and o is None and self.p_put(o) > random.random():
+            self.env.set_obj(self.pos, self.carry)
             self.carry = None
-            self.env.set_obj(self.pos, o)
 
     def p_pick(self, obj_type: str):
         f = env.get_nb_objet_in_area(self.pos, obj_type)
@@ -105,7 +105,8 @@ class Environment:
         position = (x, y)
 
         if 0 <= position[0] < self.grid_size and 0 <= position[1] < self.grid_size and self.get_a(position) is None:
-            self.agent_grid[position[0]][position[1]] = agent
+            self.set_a(agent.pos, None)
+            self.set_a(position, agent)
             agent.pos = position
 
     def get_nb_objet_in_area(self, pos: tuple, obj_type: str):
@@ -137,6 +138,9 @@ class Environment:
     def get_a(self, pos: tuple):
         return self.agent_grid[pos[0]][pos[1]]
 
+    def set_a(self, pos: tuple, a):
+        self.agent_grid[pos[0]][pos[1]] = a
+
     def print_grids(self):
         s = []
         for i, row in enumerate(self.grid):
@@ -163,13 +167,25 @@ def init_agents(nb_agents: int, environment: Environment) -> [Agent]:
     return agents
 
 
+def count_obj(env):
+    count = 0
+    for row in env.grid:
+        for cell in row:
+            if cell:
+                count += 1
+    for row in env.agent_grid:
+        for cell in row:
+            if cell and cell.carry:
+                count += 1
+    return count
+
+
 if __name__ == '__main__':
     env = Environment(objects=OBJECTS, grid_size=GRID_SIZE)
     agents = init_agents(NB_AGENTS, env)
     env.populate(agents)
     env.print_grids()
     for it in range(MAX_ITER):
-        sleep(0.5)
         agent = random.choice(agents)
         agent.act()
         env.move(agent)

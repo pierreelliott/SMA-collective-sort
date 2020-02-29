@@ -49,7 +49,11 @@ class Grid:
             print()
 
     def move(self, agent, pos: (int, int)):
-        if self.get(pos).available():
+        try:
+            available = self.get(pos).available()
+        except:
+            return False
+        if available:
             self.set_agent(agent.pos, None)
             self.set_agent(pos, agent)
             return True

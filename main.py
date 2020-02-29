@@ -17,8 +17,11 @@ MAX_ITER = int(1e7)
 K_PICK = 0.1    # k+
 K_PUT = 0.3     # k-
 
-REFRESH_FREQ = MAX_ITER//10
+AGENT_ID = 0
 
+# REFRESH_FREQ = MAX_ITER//10
+REFRESH_FREQ = 1
+LOOK_AROUND = False
 
 # ===================== Helpers =======================
 def random_position_in_grid(grid_size: int):
@@ -34,6 +37,9 @@ def create_manhattan_distance(position: (int, int)):
 
 class Agent:
     def __init__(self, environment, moves: int = 1):
+        global AGENT_ID
+        AGENT_ID += 1
+        self.id = AGENT_ID
         self.memory = deque(maxlen=MAX_MEMORY_SIZE)  # FIXME Give it as a parameter ?
         self.carry = None  # What is the agent currently carrying
         self.moves = moves  # Number of moves (ie, move 1 cell in any direction) the agent can do
@@ -58,11 +64,27 @@ class Agent:
             self.carry = None
 
     def p_pick(self, obj_type: str):
-        f = env.get_nb_objet_in_area(self.pos, obj_type)
+        """
+        Probabilité de ramasser l'objet sur la case courante
+
+        :param obj_type:
+        :return:
+        """
+        f = sum(ob == obj_type for ob in self.memory)
+        if LOOK_AROUND:  # Check adjacent tiles
+            f += env.get_nb_objet_in_area(self.pos, obj_type)
         return (K_PICK / (K_PICK + f)) ** 2
 
     def p_put(self, obj_type: str):
-        f = env.get_nb_objet_in_area(self.pos, obj_type)
+        """
+        Probabilité de déposer l'objet sur la case courante
+
+        :param obj_type:
+        :return:
+        """
+        f = sum(ob == obj_type for ob in self.memory)
+        if LOOK_AROUND:  # Check adjacent tiles
+            f += env.get_nb_objet_in_area(self.pos, obj_type)
         return (f / (K_PUT + f)) ** 2
 
 

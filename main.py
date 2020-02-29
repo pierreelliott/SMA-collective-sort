@@ -2,6 +2,8 @@ import random
 from random import randint
 from collections import deque, Counter
 from time import sleep
+from GridGraphics import GridPG
+from Agent import Agent
 
 random.seed(0)
 
@@ -17,11 +19,13 @@ MAX_ITER = int(1e7)
 K_PICK = 0.1    # k+
 K_PUT = 0.3     # k-
 
-AGENT_ID = 0
-
-# REFRESH_FREQ = MAX_ITER//10
-REFRESH_FREQ = 1
+REFRESH_FREQ = MAX_ITER//10
+# REFRESH_FREQ = 10
 LOOK_AROUND = False
+
+PYGAME = False
+CONSOLE = True
+
 
 # ===================== Helpers =======================
 def random_position_in_grid(grid_size: int):
@@ -35,64 +39,13 @@ def create_manhattan_distance(position: (int, int)):
 # ====================================================
 
 
-class Agent:
-    def __init__(self, environment, moves: int = 1):
-        global AGENT_ID
-        AGENT_ID += 1
-        self.id = AGENT_ID
-        self.memory = deque(maxlen=MAX_MEMORY_SIZE)  # FIXME Give it as a parameter ?
-        self.carry = None  # What is the agent currently carrying
-        self.moves = moves  # Number of moves (ie, move 1 cell in any direction) the agent can do
-        self.env = environment
-        self.pos = None
-
-    def memorize(self, element: object):
-        self.memory.append(element)
-
-    def act(self):
-        # Perception
-        o = env.get_obj(self.pos)
-        self.memory.append(o)
-
-        # Try pick up
-        if not self.carry and o is not None and self.p_pick(o) > random.random():
-            self.carry = o
-            self.env.set_obj(self.pos, None)
-        # Try put down
-        elif self.carry and o is None and self.p_put(o) > random.random():
-            self.env.set_obj(self.pos, self.carry)
-            self.carry = None
-
-    def p_pick(self, obj_type: str):
-        """
-        Probabilité de ramasser l'objet sur la case courante
-
-        :param obj_type:
-        :return:
-        """
-        f = sum(ob == obj_type for ob in self.memory)
-        if LOOK_AROUND:  # Check adjacent tiles
-            f += env.get_nb_objet_in_area(self.pos, obj_type)
-        return (K_PICK / (K_PICK + f)) ** 2
-
-    def p_put(self, obj_type: str):
-        """
-        Probabilité de déposer l'objet sur la case courante
-
-        :param obj_type:
-        :return:
-        """
-        f = sum(ob == obj_type for ob in self.memory)
-        if LOOK_AROUND:  # Check adjacent tiles
-            f += env.get_nb_objet_in_area(self.pos, obj_type)
-        return (f / (K_PUT + f)) ** 2
-
-
 class Environment:
     def __init__(self, objects: [(object, int)] = (('A', 200), ('B', 200)), grid_size: int = 50):
         self.grid_size = grid_size
         self.grid = [[None for i in range(grid_size)] for j in range(grid_size)]
         self.agent_grid = [[None for i in range(grid_size)] for j in range(grid_size)]
+        if PYGAME:
+            self.grid_graphics = GridPG(grid_size, grid_size, objects)
         for object_type, nb_object in objects:
             count = nb_object
             while count > 0:
@@ -168,6 +121,8 @@ class Environment:
         for i, row in enumerate(self.grid):
             for j, cell in enumerate(row):
                 agent = self.get_a((i, j))
+                if PYGAME:
+                    self.grid_graphics.draw_cell(j, i, cell, agent)
                 if agent is not None:
                     if agent.carry:
                         s.append('§')
@@ -179,7 +134,10 @@ class Environment:
                     s.append('.')
                 s.append('\t')
             s.append('\n')
-        print(''.join(s))
+        if PYGAME:
+            self.grid_graphics.display()
+        if CONSOLE:
+            print(''.join(s))
 
 
 def init_agents(nb_agents: int, environment: Environment) -> [Agent]:
@@ -208,8 +166,10 @@ if __name__ == '__main__':
     env.populate(agents)
     env.print_grids()
     for it in range(MAX_ITER):
+    # for it in range(10000):
         agent = random.choice(agents)
         agent.act()
         env.move(agent)
         if it % REFRESH_FREQ == 0:
+            print(f"Iter {it}/{MAX_ITER}")
             env.print_grids()

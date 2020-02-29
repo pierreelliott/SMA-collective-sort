@@ -30,6 +30,11 @@ class Grid:
             raise Exception("Out of range")
         self.grid[y][x] = obj
 
+    def for_each_cell(self, func):
+        for y in range(self.ROW_SIZE):
+            for x in range(self.COL_SIZE):
+                func(self.get((x, y)))
+
     def get_random_empty_cell(self):
         cell_found = False
         x, y = 0, 0

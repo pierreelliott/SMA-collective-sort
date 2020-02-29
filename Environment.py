@@ -8,13 +8,14 @@ class Environment:
     def __init__(self, objects: [(object, int)] = (('A', 200), ('B', 200)), grid_size: int = 50, pygame=False,
                  console=True):
         self.grid_size = grid_size
-        self.grid = Grid(grid_size, grid_size)
 
         self.PYGAME = pygame
         self.CONSOLE = console
 
         if self.PYGAME:
-            self.grid_graphics = GridPG(grid_size, grid_size, objects)
+            self.grid = GridPG(grid_size, grid_size, objects)
+        else:
+            self.grid = Grid(grid_size, grid_size)
 
         for object_type, nb_object in objects:
             count = nb_object
@@ -82,8 +83,8 @@ class Environment:
         s = []
         for i, row in enumerate(self.grid.grid):
             for j, cell in enumerate(row):
-                if self.PYGAME:
-                    self.grid_graphics.draw_cell(j, i, cell.obj, cell.agent)
+                # if self.PYGAME:
+                #     self.grid_graphics.draw_cell(j, i, cell.obj, cell.agent)
                 if cell.agent is not None:
                     if cell.agent.carry:
                         s.append('§')
@@ -96,6 +97,6 @@ class Environment:
                 s.append('\t')
             s.append('\n')
         if self.PYGAME:
-            self.grid_graphics.display()
+            self.grid.display()
         if self.CONSOLE:
             print(''.join(s))

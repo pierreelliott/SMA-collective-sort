@@ -2,6 +2,7 @@ import pygame as pg
 from random import randint, random
 # from CellObjectType import CellObjectType
 from colour import Color
+from Grid import Grid
 import time
 
 
@@ -24,8 +25,9 @@ DISPLAY_TIME = 0.01
 # DISPLAY_TIME = 1
 
 
-class GridPG:
-    def __init__(self, lines, columns, objects, show_border=False, show_agent=True):
+class GridPG(Grid):
+    def __init__(self, rows, columns, objects, show_border=False, show_agent=True):
+        super().__init__(rows, columns)
         self.show_agent = show_agent
         self.show_border = show_border
         self.square_size_x = WINDOW_SIZE_X  # columns
@@ -47,23 +49,24 @@ class GridPG:
             pg.font.get_default_font(), FONT_SIZE)
         self.gameDisplay = pg.display.set_mode((WINDOW_SIZE_X, WINDOW_SIZE_Y))
         pg.display.set_caption("SMA - Collective Sort")
+        self.for_each_cell(self.draw_cell)
         pg.display.update()
 
-    def draw_cell(self, col, line, cell, agent):
+    def draw_cell(self, cell):
         # color = Color(rgb=(random(), random(), random()))
         color = self.edit_color(Color("white"))
         object_cell = None
         text = ""
 
-        if cell is not None:
+        if cell.obj is not None:
             # There is an object to draw
-            color = self.objects_color[cell]
+            color = self.objects_color[cell.obj]
         # else:
         #     print("Problème !")
-        if agent is not None:
+        if cell.agent is not None:
             # Draw agent
             color = self.color_agent
-            text = str(agent.id)
+            text = str(cell.agent.id)
 
         # if cell.agent and self.show_agent:
         #     if not cell.agent.held:
@@ -83,10 +86,11 @@ class GridPG:
         #         color = self.color_b
         #     else:
         #         print("WTF")
-        self.draw_tile(col, line, color=color, text=text)
+        self.draw_tile(cell.pos[0], cell.pos[1], color=color, text=text)
 
     def draw_tile(self, col, line, color=Color("white").rgb, text=""):
         # color_edited = self.edit_color(color)
+        print(f"Tile ({col},{line}), color ('{color}'), text ('{text}')")
         color_edited = color
         pg.draw.rect(self.gameDisplay,
                      color_edited,
@@ -109,10 +113,10 @@ class GridPG:
                          TILE_BORDER_SIZE)
 
     def display(self):
-        # for cell_i in range(self.cell_number):
-        #     self.draw_cell(self.get_cell(cell_i))
+        self.for_each_cell(self.draw_cell)
         pg.display.update()
         time.sleep(DISPLAY_TIME)
+        print("Display updated")
 
     def edit_color(self, color):
         return tuple(int(c * 255) for c in color.rgb)

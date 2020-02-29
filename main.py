@@ -8,8 +8,8 @@ from Agent import Agent
 random.seed(0)
 
 # Environment constants
-GRID_SIZE = 50
-OBJECTS = (('A', 200), ('B', 200))
+GRID_SIZE = 20
+OBJECTS = (('A', 100), ('B', 100))
 # Agents constants
 NB_AGENTS = 50
 MAX_MEMORY_SIZE = 10

@@ -5,46 +5,43 @@ from Agent import Agent
 from Environment import Environment
 from pynput.keyboard import Key, Listener, KeyCode
 
-random.seed(0)
-
+# ============================================================================
+# =============================== PARAMETERS =================================
 # Environment constants
-GRID_SIZE = 50
+GRID_SIZE_X = 50
+GRID_SIZE_Y = 50
 OBJECTS = (('A', 200), ('B', 200))
 # Agents constants
 NB_AGENTS = 50
 MAX_MEMORY_SIZE = 10
-NEIGHBOURHOOD_SIZE = 2
-MOVES = 1
+MOVES = 1  # i (ie, neighborhood)
 MAX_ITER = int(1e7)
 K_PICK = 0.1  # k+
 K_PUT = 0.3  # k-
 RECOGNITION_ERROR = 0
 # RECOGNITION_ERROR = 0
 
+
+PYGAME = True  # Display the Pygame graphics
+CONSOLE = False  # Print the grid in the console for every iteration
+VERBOSE = False  # Shox iteration count in the console
+
+# ============================================================================
+# ============================================================================
+
 # REFRESH_FREQ = MAX_ITER // 1000
 REFRESH_FREQ = 1000
-LOOK_AROUND = False
-
-PYGAME = True
-CONSOLE = False
-VERBOSE = False
+LOOK_AROUND = False  # Not used
+RANDOM_AGENT = True  # Pick an agent whom will act at random (or pick each agent in round robin)
 
 # Runtime Vars
 PAUSE = False
 STOP = False
 
+random.seed(0)
+
 
 # ===================== Helpers =======================
-def random_position_in_grid(grid_size: int):
-    x = randint(0, grid_size - 1)
-    y = randint(0, grid_size - 1)
-    return x, y
-
-
-def create_manhattan_distance(position: (int, int)):
-    return lambda x, y: abs(x - position[0]) + abs(y - position[1])
-
-
 def print_helper_commands():
     print("Commandes de la simulation :")
     print("I : Afficher les commandes de la simulation (ie, ceci)")
@@ -90,13 +87,24 @@ def on_release(key):
 
 
 # ====================================================
+i_agent = 0
+
+
+def pick_agent(agents):
+    if RANDOM_AGENT:
+        return random.choice(agents)
+    else:
+        global i_agent
+        a = agents[i_agent]
+        i_agent = (i_agent + 1)%len(agents)
+        return a
 
 
 def init_agents(nb_agents: int, environment: Environment) -> [Agent]:
     agents = []
     for i in range(nb_agents):
         agents.append(Agent(environment, moves=MOVES, recognition_error=RECOGNITION_ERROR, k_pick=K_PICK,
-                            k_put=K_PUT))
+                            k_put=K_PUT, mem_size=MAX_MEMORY_SIZE))
     return agents
 
 
@@ -105,7 +113,7 @@ if __name__ == '__main__':
     listener = Listener(on_press=on_press, on_release=on_release)
     listener.start()
     print_helper_commands()
-    env = Environment(objects=OBJECTS, grid_size=GRID_SIZE, pygame=PYGAME, console=CONSOLE)
+    env = Environment(objects=OBJECTS, grid_size=(GRID_SIZE_Y, GRID_SIZE_X), pygame=PYGAME, console=CONSOLE)
     agents = init_agents(NB_AGENTS, env)
     env.populate(agents)
     env.print_grids()
@@ -117,9 +125,9 @@ if __name__ == '__main__':
         while PAUSE:
             pass
 
-        agent = random.choice(agents)
-        agent.act()
+        agent = pick_agent(agents)
         env.move(agent)
+        agent.act()
         if it % REFRESH_FREQ == 0:
             if VERBOSE:
                 print(f"Iter {it}/{MAX_ITER}")
@@ -128,5 +136,5 @@ if __name__ == '__main__':
         if STOP:
             print("=========================")
             print(f"Iteration {it} on {MAX_ITER} (max)")
-            print(f"Sort done in {time() - starting_time} seconds")
+            print(f"Sort done in {time() - starting_time:.2f} seconds")
             break

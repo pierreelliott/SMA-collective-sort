@@ -4,16 +4,16 @@ from Grid import Grid
 import time
 
 
-WINDOW_SIZE_X = 500
-WINDOW_SIZE_Y = 500
+WINDOW_SIZE_X = 600
+WINDOW_SIZE_Y = 600
 
 # TILE_BORDER_SIZE = 0
 TILE_BORDER_SIZE = 1
 
-COLORS = (Color("green"), Color("red"), Color("lightgreen"), Color("salmon"), Color("purple"), Color("blue"),
-          Color("brown"), Color("orange"))
+COLORS = (Color("green"), Color("red"), Color("blue"), Color("brown"))
+HOLDING_COLORS = (Color("lightgreen"), Color("salmon"), Color("cyan"), Color("orange"))
 FONT_COLOR = Color("black")
-FONT_SIZE = 12
+FONT_SIZE = 10
 AGENT_COLOR = Color("gold")
 
 # DISPLAY_TIME = 0
@@ -35,9 +35,11 @@ class GridPG(Grid):
         pg.font.init()
 
         self.objects_color = dict()
+        self.holder_color = dict()
         i = 0
         for obj_type, _ in objects:
             self.objects_color[obj_type] = self.edit_color(COLORS[i])
+            self.holder_color[obj_type] = self.edit_color(HOLDING_COLORS[i])
             i += 1
 
         self.color_agent = self.edit_color(AGENT_COLOR)
@@ -63,7 +65,10 @@ class GridPG(Grid):
         #     print("Problème !")
         if cell.agent is not None:
             # Draw agent
-            color = self.color_agent
+            if cell.agent.carry:
+                color = self.holder_color[cell.agent.carry]
+            else:
+                color = self.color_agent
             text = str(cell.agent.id)
 
         self.draw_tile(cell.pos[0], cell.pos[1], color=color, text=text)

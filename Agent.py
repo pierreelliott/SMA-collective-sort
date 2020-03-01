@@ -1,5 +1,5 @@
 from collections import deque
-import random
+from random import random
 
 AGENT_ID = 0
 
@@ -11,7 +11,7 @@ class Agent:
         AGENT_ID += 1
         self.id = AGENT_ID
         self.recognition_error = recognition_error
-        self.memory = deque(maxlen=mem_size)
+        self.memory = deque([None for i in range(mem_size)], maxlen=mem_size)
         self.carry = None  # What is the agent currently carrying
         self.moves = moves  # Number of moves (ie, move 1 cell in any direction) the agent can do
         self.env = environment
@@ -29,11 +29,11 @@ class Agent:
         self.memorize(o)
 
         # Try pick up
-        if not self.carry and o is not None and self.p_pick(o) > random.random():
+        if not self.carry and o is not None and random() < self.p_pick(o):
             self.carry = o
             self.env.set_obj(self.pos, None)  # Remove object from grid
         # Try put down
-        elif self.carry and o is None and self.p_put(self.carry) > random.random():
+        elif self.carry and o is None and random() < self.p_put(self.carry):
             self.env.set_obj(self.pos, self.carry)
             self.carry = None
 
@@ -51,10 +51,10 @@ class Agent:
         return 0  # TODO
 
     def f(self, object_type: str):
-        f = self.f_mem(object_type)
+        f_ = self.f_mem(object_type)
         if self.LOOK_AROUND:
-            f += self.f_grid(object_type)
-        return f
+            f_ += self.f_grid(object_type)
+        return f_
 
     def p_pick(self, obj_type: str):
         """

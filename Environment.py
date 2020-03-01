@@ -5,17 +5,17 @@ import random
 
 
 class Environment:
-    def __init__(self, objects: [(object, int)] = (('A', 200), ('B', 200)), grid_size: int = 50, pygame=False,
-                 console=True):
+    def __init__(self, objects: [(object, int)] = (('A', 200), ('B', 200)), grid_size: (int, int) = (50, 50),
+                 pygame=False, console=True):
         self.grid_size = grid_size
 
         self.PYGAME = pygame
         self.CONSOLE = console
 
         if self.PYGAME:
-            self.grid = GridPG(grid_size, grid_size, objects)
+            self.grid = GridPG(grid_size[0], grid_size[1], objects)
         else:
-            self.grid = Grid(grid_size, grid_size)
+            self.grid = Grid(grid_size[0], grid_size[1])
 
         for object_type, nb_object in objects:
             count = nb_object
@@ -48,6 +48,7 @@ class Environment:
                 return
 
     def get_nb_objet_in_area(self, pos: tuple, obj_type: str):
+        # FIXME 'self.grid_size' est un tuple maintenant !!
         res = 0
         if pos[0] < self.grid_size - 1:
             c = (pos[0] + 1, pos[1])

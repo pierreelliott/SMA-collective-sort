@@ -13,19 +13,20 @@ OBJECTS = (('A', 100), ('B', 100))
 NB_AGENTS = 50
 MAX_MEMORY_SIZE = 10
 NEIGHBOURHOOD_SIZE = 2
-MOVES = 2
+MOVES = 1
 MAX_ITER = int(1e7)
 K_PICK = 0.1  # k+
 K_PUT = 0.3  # k-
 RECOGNITION_ERROR = 0.2
 # RECOGNITION_ERROR = 0
 
-REFRESH_FREQ = MAX_ITER // 10
-# REFRESH_FREQ = 10
+# REFRESH_FREQ = MAX_ITER // 1000
+REFRESH_FREQ = 1000
 LOOK_AROUND = False
 
 PYGAME = True
-CONSOLE = True
+CONSOLE = False
+VERBOSE = False
 
 
 # ===================== Helpers =======================
@@ -61,5 +62,6 @@ if __name__ == '__main__':
         agent.act()
         env.move(agent)
         if it % REFRESH_FREQ == 0:
-            print(f"Iter {it}/{MAX_ITER}")
+            if VERBOSE:
+                print(f"Iter {it}/{MAX_ITER}")
             env.print_grids()

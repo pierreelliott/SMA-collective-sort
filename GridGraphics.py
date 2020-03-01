@@ -30,8 +30,8 @@ class GridPG(Grid):
         super().__init__(rows, columns)
         self.show_agent = show_agent
         self.show_border = show_border
-        self.square_size_x = WINDOW_SIZE_X  # columns
-        self.square_size_y = WINDOW_SIZE_Y  # lines
+        self.square_size_x = WINDOW_SIZE_X/columns  # columns
+        self.square_size_y = WINDOW_SIZE_Y/rows  # lines
         print(self.square_size_x, self.square_size_y)
         pg.init()
         pg.font.init()
@@ -90,7 +90,7 @@ class GridPG(Grid):
 
     def draw_tile(self, col, line, color=Color("white").rgb, text=""):
         # color_edited = self.edit_color(color)
-        print(f"Tile ({col},{line}), color ('{color}'), text ('{text}')")
+        # print(f"Tile ({col},{line}), color ('{color}'), text ('{text}')")
         color_edited = color
         pg.draw.rect(self.gameDisplay,
                      color_edited,
@@ -116,7 +116,6 @@ class GridPG(Grid):
         self.for_each_cell(self.draw_cell)
         pg.display.update()
         time.sleep(DISPLAY_TIME)
-        print("Display updated")
 
     def edit_color(self, color):
         return tuple(int(c * 255) for c in color.rgb)

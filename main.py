@@ -7,8 +7,8 @@ from Environment import Environment
 random.seed(0)
 
 # Environment constants
-GRID_SIZE = 20
-OBJECTS = (('A', 100), ('B', 100))
+GRID_SIZE = 50
+OBJECTS = (('A', 200), ('B', 200))
 # Agents constants
 NB_AGENTS = 50
 MAX_MEMORY_SIZE = 10
@@ -17,7 +17,7 @@ MOVES = 1
 MAX_ITER = int(1e7)
 K_PICK = 0.1  # k+
 K_PUT = 0.3  # k-
-RECOGNITION_ERROR = 0.2
+RECOGNITION_ERROR = 0
 # RECOGNITION_ERROR = 0
 
 # REFRESH_FREQ = MAX_ITER // 1000
@@ -26,7 +26,7 @@ LOOK_AROUND = False
 
 PYGAME = True
 CONSOLE = False
-VERBOSE = False
+VERBOSE = True
 
 
 # ===================== Helpers =======================

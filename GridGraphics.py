@@ -1,6 +1,4 @@
 import pygame as pg
-from random import randint, random
-# from CellObjectType import CellObjectType
 from colour import Color
 from Grid import Grid
 import time
@@ -68,24 +66,6 @@ class GridPG(Grid):
             color = self.color_agent
             text = str(cell.agent.id)
 
-        # if cell.agent and self.show_agent:
-        #     if not cell.agent.held:
-        #         color = self.color_agent
-        #     elif cell.agent.held.type_object == CellObjectType.A:
-        #         color = self.color_agent_a
-        #     elif cell.agent.held.type_object == CellObjectType.B:
-        #         color = self.color_agent_b
-        #     else:
-        #         print("wtf")
-        #     text = cell.agent.name
-        # elif cell.obj:
-        #     cell_type = cell.type_object()
-        #     if cell_type == CellObjectType.A:
-        #         color = self.color_a
-        #     elif cell_type == CellObjectType.B:
-        #         color = self.color_b
-        #     else:
-        #         print("WTF")
         self.draw_tile(cell.pos[0], cell.pos[1], color=color, text=text)
 
     def draw_tile(self, col, line, color=Color("white").rgb, text=""):

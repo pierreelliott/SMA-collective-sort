@@ -10,17 +10,17 @@ from pynput.keyboard import Key, Listener, KeyCode
 # Environment constants
 GRID_SIZE_X = 50
 GRID_SIZE_Y = 50
-OBJECTS = (('A', 200), ('B', 200))
+OBJECTS = (('A', 200), ('B', 200))  # , ('C', 200), ('D', 200))
 # Agents constants
 NB_AGENTS = 50
 MAX_MEMORY_SIZE = 10
 MOVES = 1  # i (ie, neighborhood)
-MAX_ITER = int(1e7)
 K_PICK = 0.1  # k+
 K_PUT = 0.3  # k-
 RECOGNITION_ERROR = 0
 # RECOGNITION_ERROR = 0
 
+MAX_ITER = int(1e7)
 
 PYGAME = True  # Display the Pygame graphics
 CONSOLE = False  # Print the grid in the console for every iteration
